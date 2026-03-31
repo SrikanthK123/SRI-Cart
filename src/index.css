@@ -1,0 +1,103 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  --color-gold-light: #fdf5e6;
+  --color-gold-dark: #8b5e3c;
+  --color-teal-dark: #0F3D3E;
+  --color-teal-deep: #082121;
+}
+
+body {
+  @apply bg-[#fdf5e6] text-[#1a1a1a] antialiased overflow-x-hidden;
+}
+
+.bokeh {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.2;
+  background: radial-gradient(circle, #fbbf24 0%, transparent 70%);
+}
+
+.gold-text {
+  background: linear-gradient(to bottom, #c5a059 0%, #8b5e3c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-button {
+  background: linear-gradient(to bottom, #8b5e3c 0%, #5d3a1a 100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gold-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(139, 94, 60, 0.3);
+}
+
+.teal-gradient {
+  background: linear-gradient(135deg, #0F3D3E 0%, #082121 100%);
+}
+
+.teal-text-gradient {
+  background: linear-gradient(to bottom, #0F3D3E 0%, #082121 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-dark {
+  background: rgba(15, 61, 62, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(15, 61, 62, 0.1);
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  display: flex;
+  animation: marquee 30s linear infinite;
+}
+
+.text-stroke {
+  -webkit-text-stroke: 1px rgba(139, 94, 60, 0.3);
+  color: transparent;
+}
+
+.slam-in {
+  animation: slamIn 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes slamIn {
+  0% { transform: scale(1.5) translateY(100px); opacity: 0; filter: blur(20px); }
+  100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0); }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .footer-link {
+    @apply text-black/50 hover:text-[#8b5e3c] transition-all duration-300 flex items-center gap-2;
+  }
+  .footer-link:hover {
+    @apply translate-x-2;
+  }
+}

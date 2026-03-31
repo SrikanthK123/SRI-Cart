@@ -2,67 +2,88 @@ import { motion, AnimatePresence } from "motion/react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { ShoppingCart, Smartphone, Gift, ShoppingBag, Menu, X, ChevronRight, ChevronLeft, Star, ArrowRight, Quote, Play, Heart, Plus, Minus, Home, Trophy, MessageSquare, Users, Zap, Camera, BatteryCharging, Monitor, Video } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
-import SRI_StudioImg from "/src/assets/Images/SRI_PackingBag.jpg";
-import SRI_StudioImg2 from "/src/assets/Images/SRI_Studio_LongImage.jpg";
-import SRI_StudioImg3 from "/src/assets/Images/SRIMainImage-1.jpg";
-import ClothMeasurement from "/src/assets/Images/ClothMeasurement.jpg";
-import SRIBrandInCity from "/src/assets/Images/SRIBrandInCity.jpg";
-import SRISuitInOffice from "/src/assets/Images/SRISuitInOffice.jpg";
-import MainWomenKurti from "/src/assets/Images/MainWomenKurti.jpg";
-import MainWomenHeels from "/src/assets/Images/MainWomenHeels.jpg";
-import MainWomenSaree from "/src/assets/Images/MainWomenSaree.jpg";
-import MainWomenLehengaCholi from "/src/assets/Images/MainWomenLehengaCholi.jpg";
-import MainWomenHandBag from "/src/assets/Images/MainWomenHandBag.jpg";
-import BestSellerMens2 from "/src/assets/Images/BestSellerMens-2.jpg";
-import BestSellerMens3 from "/src/assets/Images/BestSellerMens-3.jpg";
-import BestSellerWomens1 from "/src/assets/Images/BestSellerWomens-1.jpg";
-import BestSellerWomens2 from "/src/assets/Images/BestSellerWomens-2.jpg";
+import SRI_StudioImg from "./assets/Images/SRI_PackingBag.jpg";
+import SRI_StudioImg2 from "./assets/Images/SRI_Studio_LongImage.jpg";
+import SRI_StudioImg3 from "./assets/Images/SRIMainImage-1.jpg";
+import ClothMeasurement from "./assets/Images/ClothMeasurement.jpg";
+import SRIBrandInCity from "./assets/Images/SRIBrandInCity.jpg";
+import SRISuitInOffice from "./assets/Images/SRISuitInOffice.jpg";
+import MainWomenKurti from "./assets/Images/MainWomenKurti.jpg";
+import MainWomenHeels from "./assets/Images/MainWomenHeels.jpg";
+import MainWomenSaree from "./assets/Images/MainWomenSaree.jpg";
+import MainWomenLehengaCholi from "./assets/Images/MainWomenLehengaCholi.jpg";
+import MainWomenHandBag from "./assets/Images/MainWomenHandBag.jpg";
+import BestSellerMens2 from "./assets/Images/BestSellerMens-2.jpg";
+import BestSellerMens3 from "./assets/Images/BestSellerMens-3.jpg";
+import BestSellerWomens1 from "./assets/Images/BestSellerWomens-1.jpg";
+import BestSellerWomens2 from "./assets/Images/BestSellerWomens-2.jpg";
+import SRI_Cart_Logo from "./assets/Images/SRI-Cart Logo.jpg";
+import MensMainSuitCard from "./assets/Images/Men'sMainSuitCard.jpg";
+import MensMainShirtCard from "./assets/Images/Men'sMainShirtCard.jpg";
+import MensMainPantCard from "./assets/Images/Mens'sMainPantCard.jpg";
+import MensMainTShirtCard from "./assets/Images/Men'sMainTShirtCard.jpg";
+import MensMainPerfumeCard from "./assets/Images/Men'sMainPerfumeCard.jpg";
 
-import Saree1 from "/src/assets/Images/Saree-1.jpg";
-import Saree2 from "/src/assets/Images/Saree-2.jpg";
-import Saree3 from "/src/assets/Images/Saree-3.jpg";
-import Lehenga1 from "/src/assets/Images/Lehenga Choli-1.jpg";
-import Lehenga2 from "/src/assets/Images/Lehenga Choli-2.jpg";
-import Lehenga3 from "/src/assets/Images/Lehenga Choli-3.jpg";
-import Kurta1 from "/src/assets/Images/Kurti Set-1.jpg";
-import Kurta2 from "/src/assets/Images/Kurti Set-2.jpg";
-import Kurta3 from "/src/assets/Images/Kurti Set-3.jpg";
-import Heels1 from "/src/assets/Images/Heels Sandals-1.jpg";
-import Heels2 from "/src/assets/Images/Heels Sandals-2.jpg";
-import Heels3 from "/src/assets/Images/Heels Sandals-3.jpg";
-import Handbag1 from "/src/assets/Images/Handbag-1.jpg";
-import Handbag2 from "/src/assets/Images/Handbag-2.jpg";
-import Handbag3 from "/src/assets/Images/Handbag-3.jpg";
+import Saree1 from "./assets/Images/Saree-1.jpg";
+import Saree2 from "./assets/Images/Saree-2.jpg";
+import Saree3 from "./assets/Images/Saree-3.jpg";
+import Lehenga1 from "./assets/Images/Lehenga Choli-1.jpg";
+import Lehenga2 from "./assets/Images/Lehenga Choli-2.jpg";
+import Lehenga3 from "./assets/Images/Lehenga Choli-3.jpg";
+import Kurta1 from "./assets/Images/Kurti Set-1.jpg";
+import Kurta2 from "./assets/Images/Kurti Set-2.jpg";
+import Kurta3 from "./assets/Images/Kurti Set-3.jpg";
+import Heels1 from "./assets/Images/Heels Sandals-1.jpg";
+import Heels2 from "./assets/Images/Heels Sandals-2.jpg";
+import Heels3 from "./assets/Images/Heels Sandals-3.jpg";
+import Handbag1 from "./assets/Images/Handbag-1.jpg";
+import Handbag2 from "./assets/Images/Handbag-2.jpg";
+import Handbag3 from "./assets/Images/Handbag-3.jpg";
 
-import BabyBoyBlazer from "/src/assets/Images/BabyBoyBlazer-1.jpg";
-import BabyBoyBlazer2 from "/src/assets/Images/BabyBoyBlazer-2.jpg";
-import BabyBoyBlazer3 from "/src/assets/Images/BabyBoyBlazer-3.jpg";
-import BabyBoyBlazer4 from "/src/assets/Images/BabyBoyBlazer-4.jpg";
+import BabyBoyBlazer from "./assets/Images/BabyBoyBlazer-1.jpg";
+import BabyBoyBlazer2 from "./assets/Images/BabyBoyBlazer-2.jpg";
+import BabyBoyBlazer3 from "./assets/Images/BabyBoyBlazer-3.jpg";
+import BabyBoyBlazer4 from "./assets/Images/BabyBoyBlazer-4.jpg";
 
-import BabyBoyTraditional from "/src/assets/Images/BabyBoyTraditional-2.jpg";
-import BabyBoyTraditional1 from "/src/assets/Images/BabyBoyTraditional-1.jpg";
-import BabyBoyTraditional3 from "/src/assets/Images/BabyBoyTraditional-3.jpg";
-import BabyBoyTraditional4 from "/src/assets/Images/BabyBoyTraditional-4.jpg";
+import BabyBoyTraditional from "./assets/Images/BabyBoyTraditional-2.jpg";
+import BabyBoyTraditional1 from "./assets/Images/BabyBoyTraditional-1.jpg";
+import BabyBoyTraditional3 from "./assets/Images/BabyBoyTraditional-3.jpg";
+import BabyBoyTraditional4 from "./assets/Images/BabyBoyTraditional-4.jpg";
 
-import BabyGirlFrock1 from "/src/assets/Images/BabyGirlFrock-1.jpg";
-import BabyGirlFrock2 from "/src/assets/Images/BabyGirlFrock-2.jpg";
-import BabyGirlFrock from "/src/assets/Images/BabyGirlFrock-3.jpg";
-import BabyGirlFrock4 from "/src/assets/Images/BabyGirlFrock-4.jpg";
+import BabyGirlFrock1 from "./assets/Images/BabyGirlFrock-1.jpg";
+import BabyGirlFrock2 from "./assets/Images/BabyGirlFrock-2.jpg";
+import BabyGirlFrock from "./assets/Images/BabyGirlFrock-3.jpg";
+import BabyGirlFrock4 from "./assets/Images/BabyGirlFrock-4.jpg";
 
-import BabyGirlTraditional from "/src/assets/Images/BabyGirlTraditional-1.jpg";
-import BabyGirlTraditional2 from "/src/assets/Images/BabyGirlTraditional-2.jpg";
-import BabyGirlTraditional3 from "/src/assets/Images/BabyGirlTraditional-3.jpg";
-import BabyGirlTraditional4 from "/src/assets/Images/BabyGirlTraditional-4.jpg";
+import BabyGirlTraditional from "./assets/Images/BabyGirlTraditional-1.jpg";
+import BabyGirlTraditional2 from "./assets/Images/BabyGirlTraditional-2.jpg";
+import BabyGirlTraditional3 from "./assets/Images/BabyGirlTraditional-3.jpg";
+import BabyGirlTraditional4 from "./assets/Images/BabyGirlTraditional-4.jpg";
 
-import KidsSchoolBag from "/src/assets/Images/MainKidsSchoolBagCard.jpg";
-import KidsSchoolMarvelBag1 from "/src/assets/Images/KidsSchoolMarvelBag-1.jpg";
-import KidsSchoolBarbieBag2 from "/src/assets/Images/KidsSchoolBarbieBag-2.jpg";
-import KidsSchoolPokemonBag3 from "/src/assets/Images/KidsSchoolPokemonBag-3.jpg";
-import KidsSchoolNijajHattoriBag4 from "/src/assets/Images/KidsSchoolNijajHattoriBag-4.jpg";
-import ExperienceSectionImage from "/src/assets/Images/SRIMainImage-1.jpg";
-import ExperienceSectionImage1 from "/src/assets/Images/Men'sSshirt-1.jpg";
-import ExperienceSectionVideo from "/src/assets/Videos/ExperienceSectionVideo.mp4";
-import MainLogoRevealVideo from "/src/assets/Videos/MainLogoReveal.mp4";
+import KidsSchoolBag from "./assets/Images/MainKidsSchoolBagCard.jpg";
+import KidsSchoolMarvelBag1 from "./assets/Images/KidsSchoolMarvelBag-1.jpg";
+import KidsSchoolBarbieBag2 from "./assets/Images/KidsSchoolBarbieBag-2.jpg";
+import KidsSchoolPokemonBag3 from "./assets/Images/KidsSchoolPokemonBag-3.jpg";
+import KidsSchoolNijajHattoriBag4 from "./assets/Images/KidsSchoolNijajHattoriBag-4.jpg";
+import ExperienceSectionImage from "./assets/Images/SRIMainImage-1.jpg";
+import ExperienceSectionImage1 from "./assets/Images/Men'sSshirt-1.jpg";
+import TShirt1 from "./assets/Images/Men'sT-shirt-1.jpg";
+import TShirt2 from "./assets/Images/Men'sT-shirt-2.jpg";
+import TShirt3 from "./assets/Images/Men'sT-shirt-3.jpg";
+import SShirt2 from "./assets/Images/Men'sSshirt-2.jpg";
+import SShirt3 from "./assets/Images/Men'sSshirt-3.jpg";
+import SShirt4 from "./assets/Images/Men'sSshirt-4.jpg";
+import Suit1 from "./assets/Images/Men'sSuit-1.jpg";
+import Suit2 from "./assets/Images/Men'sSuit-2.jpg";
+import Suit3 from "./assets/Images/Men'sSuit-3.jpg";
+import Jeans1 from "./assets/Images/Men'sJeans-1.jpg";
+import Jeans2 from "./assets/Images/Men'sJeans-2.jpg";
+import Jeans3 from "./assets/Images/Men'sJeans-3.jpg";
+import Perfume1 from "./assets/Images/Men'sPerfume-1.jpg";
+import Perfume2 from "./assets/Images/Men'sPerfume-2.jpg";
+import Perfume3 from "./assets/Images/Men'sPerfume-3.jpg";
+import ExperienceSectionVideo from "./assets/Videos/ExperienceSectionVideo.mp4";
+import MainLogoRevealVideo from "./assets/Videos/MainLogoReveal.mp4";
 
 import { ShopByCategory } from "./components/ShopByCategory";
 import { ProductDetail } from "./components/ProductDetail";
@@ -71,7 +92,7 @@ import UpdatingPage from "./components/UpdatingPage";
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/SRI-Cart/">
       <AppContent />
     </BrowserRouter>
   );
@@ -209,11 +230,11 @@ function AppContent() {
 
   const categoryData = {
     Men: [
-      { name: "Suits", img: "/src/assets/Images/Men'sMainSuitCard.jpg" },
-      { name: "Shirts", img: "/src/assets/Images/Men'sMainShirtCard.jpg" },
-      { name: "Pants", img: "/src/assets/Images/Mens'sMainPantCard.jpg" },
-      { name: "T-Shirts", img: "/src/assets/Images/Men'sMainTShirtCard.jpg" },
-      { name: "Perfumes", img: "/src/assets/Images/Men'sMainPerfumeCard.jpg" },
+      { name: "Suits", img: MensMainSuitCard },
+      { name: "Shirts", img: MensMainShirtCard },
+      { name: "Pants", img: MensMainPantCard },
+      { name: "T-Shirts", img: MensMainTShirtCard },
+      { name: "Perfumes", img: MensMainPerfumeCard },
     ],
     Women: [
       { name: "Kurti", img: MainWomenKurti, url: "/women-kurta" },
@@ -253,11 +274,7 @@ function AppContent() {
     name: "Men's Premium T-Shirt",
     price: "299.00",
     description: "High-quality cotton T-shirt for everyday comfort.",
-    images: [
-      "/src/assets/Images/Men'sT-shirt-1.jpg",
-      "/src/assets/Images/Men'sT-shirt-2.jpg",
-      "/src/assets/Images/Men'sT-shirt-3.jpg",
-    ],
+    images: [TShirt1, TShirt2, TShirt3],
     colors: [
       { name: "Classic Black", color: "#1a1a1a" },
       { name: "Pure White", color: "#ffffff" },
@@ -270,11 +287,7 @@ function AppContent() {
     name: "Men's Premium Shirt",
     price: "799.00",
     description: "Elegant formal shirt with a perfect fit.",
-    images: [
-      "/src/assets/Images/Men'sSshirt-2.jpg",
-      "/src/assets/Images/Men'sSshirt-3.jpg",
-      "/src/assets/Images/Men'sSshirt-4.jpg",
-    ],
+    images: [SShirt2, SShirt3, SShirt4],
     colors: [
       { name: "Sky Blue", color: "#87CEEB" },
       { name: "White", color: "#ffffff" },
@@ -287,11 +300,7 @@ function AppContent() {
     name: "Men's Executive Suit",
     price: "1199.00",
     description: "Tailored suit for a sharp and professional look.",
-    images: [
-      "/src/assets/Images/Men'sSuit-1.jpg",
-      "/src/assets/Images/Men'sSuit-2.jpg",
-      "/src/assets/Images/Men'sSuit-3.jpg",
-    ],
+    images: [Suit1, Suit2, Suit3],
     colors: [
       { name: "Midnight Blue", color: "#191970" },
       { name: "Charcoal Gray", color: "#36454F" },
@@ -304,11 +313,7 @@ function AppContent() {
     name: "Men's Premium Trousers",
     price: "899.00",
     description: "High-quality denim and fabric for maximum durability.",
-    images: [
-      "/src/assets/Images/Men'sJeans-1.jpg",
-      "/src/assets/Images/Men'sJeans-2.jpg",
-      "/src/assets/Images/Men'sJeans-3.jpg",
-    ],
+    images: [Jeans1, Jeans2, Jeans3],
     colors: [
       { name: "Dark Indigo", color: "#000040" },
       { name: "Slate Blue", color: "#6A5ACD" },
@@ -321,11 +326,7 @@ function AppContent() {
     name: "Men's Signature Scent",
     price: "449.00",
     description: "A bold and long-lasting fragrance for the modern man.",
-    images: [
-      "/src/assets/Images/Men'sPerfume-1.jpg",
-      "/src/assets/Images/Men'sPerfume-2.jpg",
-      "/src/assets/Images/Men'sPerfume-3.jpg",
-    ],
+    images: [Perfume1, Perfume2, Perfume3],
     colors: [
       { name: "Gold", color: "#FFD700" },
       { name: "Silver", color: "#C0C0C0" },
@@ -709,7 +710,7 @@ function AppContent() {
                           {!isLogoRevealPlaying ? (
                             <>
                               <img
-                                src="/src/assets/Images/SRI-Cart Logo.jpg"
+                                src={SRI_Cart_Logo}
                                 alt="SRI-Cart Logo"
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 referrerPolicy="no-referrer"

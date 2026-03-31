@@ -7,6 +7,3 @@ coverage/
 .env*
 !.env.example
 
-# SRI Assets (Hidden as requested - WARNING: This will break the live website images/videos)
-src/assets/Images/
-public/Videos/

@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { ShoppingCart, Smartphone, Gift, ShoppingBag, Menu, X, ChevronRight, ChevronLeft, Star, ArrowRight, Quote, Play, Heart, Plus, Minus, Home, Trophy, MessageSquare, Users, Zap, Camera, BatteryCharging, Monitor, Video } from "lucide-react";
+import { ShoppingCart, Smartphone, Gift, ShoppingBag, Menu, X, ChevronRight, ChevronLeft, Star, ArrowRight, Quote, Play, Heart, Plus, Minus, Home, Trophy, MessageSquare, Users, Zap, Camera, BatteryCharging, Monitor, Video, ClipboardCheck, Package, Truck, User } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import SRI_StudioImg from "./assets/Images/SRI_PackingBag.jpg";
 import SRI_StudioImg2 from "./assets/Images/SRI_Studio_LongImage.jpg";
@@ -89,6 +89,8 @@ import { ShopByCategory } from "./components/ShopByCategory";
 import { ProductDetail } from "./components/ProductDetail";
 import { CartPreview } from "./components/CartPreview";
 import UpdatingPage from "./components/UpdatingPage";
+import FeatureBar from "./components/FeatureBar";
+
 
 export default function App() {
   return (
@@ -651,7 +653,7 @@ function AppContent() {
                   </div>
 
                   {/* Right Side: Immersive Visuals */}
-                  <div className="relative flex justify-center lg:justify-end items-center h-full min-h-[600px] lg:min-h-[850px] order-2 z-10">
+                  <div className="relative flex justify-center lg:justify-end items-center h-full min-h-[720px] sm:min-h-[600px] lg:min-h-[850px] order-2 z-10">
                     {/* Floating Glass Cards */}
                     <motion.div
                       animate={{ y: [0, -20, 0], rotate: [0, 2, 0] }}
@@ -781,29 +783,9 @@ function AppContent() {
                 </div>
               </div>
 
-              {/* Static Feature Bar (Refined Layout) */}
-              <div className="absolute bottom-0 left-0 w-full py-10 bg-gradient-to-r from-[#0F3D3E] via-[#1a3b3b] to-[#0F3D3E] border-t border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.3)]">
-                <div className="max-w-7xl mx-auto px-6">
-                  <div className="flex flex-wrap justify-center items-center gap-12 lg:gap-24">
-                    <div className="flex items-center gap-4 group cursor-default">
-                      <Monitor className="w-6 h-6 text-amber-500/80 group-hover:text-amber-400 transition-colors" />
-                      <span className="text-white font-serif text-2xl font-medium tracking-tight group-hover:text-amber-50/90 transition-colors">Next-Gen Display</span>
-                    </div>
-                    <div className="flex items-center gap-4 group cursor-default">
-                      <Zap className="w-6 h-6 text-amber-500/80 group-hover:text-amber-400 transition-colors" />
-                      <span className="text-white font-serif text-2xl font-medium tracking-tight group-hover:text-amber-50/90 transition-colors">Ultra-Fast 5G</span>
-                    </div>
-                    <div className="flex items-center gap-4 group cursor-default">
-                      <Camera className="w-6 h-6 text-amber-500/80 group-hover:text-amber-400 transition-colors" />
-                      <span className="text-white font-serif text-2xl font-medium tracking-tight group-hover:text-amber-50/90 transition-colors">Pro Camera System</span>
-                    </div>
-                    <div className="flex items-center gap-4 group cursor-default">
-                      <BatteryCharging className="w-6 h-6 text-amber-500/80 group-hover:text-amber-400 transition-colors" />
-                      <span className="text-white font-serif text-2xl font-medium tracking-tight group-hover:text-amber-50/90 transition-colors">All-Day Battery</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* Premium Feature Showcase Bar (Replaced Fulfillment Animation) */}
+              <FeatureBar />
+
             </section>
 
             {/* Experience Section (Inspired by Uploaded Image) */}

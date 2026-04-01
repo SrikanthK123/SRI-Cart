@@ -50,9 +50,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
 
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-24 items-start">
           {/* Left: Thumbnail & Main Image */}
-          <div className="lg:col-span-7 flex flex-col md:flex-row gap-8">
+          <div className="lg:col-span-7 flex flex-col md:flex-row gap-8 w-full max-w-full overflow-hidden">
             {/* Thumbnails */}
-            <div className="flex md:flex-col gap-4 md:gap-5 order-2 md:order-1 overflow-x-auto md:overflow-y-auto max-h-[120px] md:max-h-[60vh] lg:max-h-[80vh] pb-2 md:pb-0 pr-0 md:pr-4 no-scrollbar snap-x md:snap-y snap-mandatory scroll-smooth shrink-0 min-w-0">
+            <div className="flex md:flex-col gap-4 md:gap-5 order-2 md:order-1 overflow-x-auto md:overflow-y-auto max-h-[120px] md:max-h-[60vh] lg:max-h-[80vh] pb-2 md:pb-0 pr-0 md:pr-4 no-scrollbar snap-x md:snap-y snap-mandatory scroll-smooth shrink-0 min-w-0 w-full md:w-auto">
               {product.images.map((img, index) => (
                 <button
                   key={index}
@@ -69,7 +69,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
             </div>
 
             {/* Main Image Card */}
-            <div className="flex-1 order-1 md:order-2 w-full max-w-[500px] mx-auto lg:max-w-none">
+            <div className="flex-1 order-1 md:order-2 w-full max-w-full lg:max-w-none mx-auto min-w-0">
               <div className="relative aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5] max-h-[60vh] md:max-h-[70vh] lg:max-h-[80vh] rounded-[2.5rem] md:rounded-[4rem] overflow-hidden bg-white shadow-2xl shadow-black/5 border border-white/50">
                 <AnimatePresence mode="wait">
                   <motion.img

@@ -596,7 +596,7 @@ function AppContent() {
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
-                        className="text-7xl sm:text-8xl lg:text-8xl font-serif font-black leading-[0.9] tracking-tighter gold-text slam-in"
+                        className="text-6xl sm:text-8xl lg:text-9xl font-serif font-black leading-[0.9] tracking-tighter gold-text slam-in"
                       >
                         SRI<br />CART
                       </motion.h1>
@@ -633,9 +633,9 @@ function AppContent() {
                       transition={{ delay: 1.2 }}
                       className="flex flex-col sm:flex-row items-center gap-8"
                     >
-                      <button className="group relative px-20 py-7 gold-button text-white rounded-2xl font-bold text-2xl shadow-2xl shadow-[#8b5e3c]/30 overflow-hidden">
+                      <button className="group relative px-10 sm:px-20 py-5 sm:py-7 gold-button text-white rounded-[1.5rem] sm:rounded-2xl font-bold text-xl sm:text-2xl shadow-2xl shadow-[#8b5e3c]/30 overflow-hidden">
                         <span className="relative z-10 flex items-center gap-3 uppercase tracking-widest">
-                          Explore Now <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                          Explore Now <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-2 transition-transform" />
                         </span>
                         <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                       </button>

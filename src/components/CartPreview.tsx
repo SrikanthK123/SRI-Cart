@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { X, Minus, Plus, ShoppingBag, ArrowRight, Delete, Trash } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import React from "react";
 
 interface CartItem {
@@ -27,13 +28,43 @@ export const CartPreview: React.FC<CartPreviewProps> = ({
   updateQuantity,
   removeFromCart,
 }) => {
+  const navigate = useNavigate();
+
+  const getCartHash = (items: CartItem[]) => {
+    const seed = items
+      .map(item => `${item.cartId}:${item.name}:${item.size}:${item.quantity}`)
+      .join("|");
+    let hash = 0;
+    for (let i = 0; i < seed.length; i += 1) {
+      hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+      hash |= 0;
+    }
+    return `cart-${Math.abs(hash).toString(36)}`;
+  };
+
   const parsePrice = (price: string) => {
     if (typeof price !== 'string') return 0;
     return parseFloat(price.replace(/,/g, ''));
   };
 
   const subtotal = cart.reduce((acc, item) => acc + parsePrice(item.price) * item.quantity, 0);
-  const tax = subtotal * 0.04; // 4% tax
+  const totalQuantity = cart.reduce((acc, item) => acc + item.quantity, 0);
+  
+  let tax = 0;
+  if (totalQuantity > 0) {
+    if (totalQuantity <= 2) {
+      // 1–2 items: ₹100–₹150, nudging toward ₹150 for higher cart values.
+      // Normalize cart value in a typical ₹300–₹2000 range → blends between 100 and 150.
+      const normalized = Math.min(1, Math.max(0, (subtotal - 300) / 1700));
+      tax = Math.round(100 + normalized * 50);
+    } else {
+      // 3+ items: below ₹99, scaling down smoothly as item count grows.
+      // At 3 items → ~₹90; at 5 items → ~₹70; at 8+ items → floors near ₹40.
+      const base = 99 - (totalQuantity - 3) * 8;
+      tax = Math.round(Math.min(98, Math.max(40, base)));
+    }
+  }
+
   const total = subtotal + tax;
 
   return (
@@ -156,7 +187,14 @@ export const CartPreview: React.FC<CartPreviewProps> = ({
                   >
                     Cancel
                   </button>
-                  <button className="py-5 rounded-2xl bg-[#8b5e3c] text-white font-bold text-[10px] uppercase tracking-widest hover:bg-[#704a2f] transition-all shadow-xl shadow-amber-900/20 flex items-center justify-center gap-3 group active:scale-[0.98]">
+                  <button
+                    onClick={() => {
+                      const cartHash = getCartHash(cart);
+                      onClose();
+                      navigate(`/#${cartHash}`);
+                    }}
+                    className="py-5 rounded-2xl bg-[#8b5e3c] text-white font-bold text-[10px] uppercase tracking-widest hover:bg-[#704a2f] transition-all shadow-xl shadow-amber-900/20 flex items-center justify-center gap-3 group active:scale-[0.98]"
+                  >
                     Continue
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>

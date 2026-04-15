@@ -88,6 +88,8 @@ import MainLogoRevealVideo from "./assets/Videos/MainLogoReveal.mp4";
 import { ShopByCategory } from "./components/ShopByCategory";
 import { ProductDetail } from "./components/ProductDetail";
 import { CartPreview } from "./components/CartPreview";
+import FinalPay from "./components/FinalPay";
+import OrderDetails from "./components/OrderDetails";
 import UpdatingPage from "./components/UpdatingPage";
 import FeatureBar from "./components/FeatureBar";
 
@@ -103,6 +105,7 @@ export default function App() {
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
+  const showFinalPay = location.hash.startsWith("#cart-");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(1);
   const [activeTab, setActiveTab] = useState<"Men" | "Women" | "Kids">("Men");
@@ -126,8 +129,13 @@ function AppContent() {
   const galleryRef = useRef<HTMLDivElement | null>(null);
 
   const addToCart = (product: any, quantity: number, size: string, selectedImageIndex: number) => {
-    setCart(prev => [...prev, { ...product, quantity, size, selectedImageIndex, cartId: Date.now() }]);
-    setIsCartOpen(true);
+    setCart(prev => {
+      const isFirstItem = prev.length === 0;
+      if (isFirstItem) {
+        setIsCartOpen(true);
+      }
+      return [...prev, { ...product, quantity, size, selectedImageIndex, cartId: Date.now() }];
+    });
   };
 
   const updateCartQuantity = (cartId: number, delta: number) => {
@@ -140,6 +148,15 @@ function AppContent() {
 
   const removeFromCart = (cartId: number) => {
     setCart(prev => prev.filter(item => item.cartId !== cartId));
+  };
+
+  const clearCart = () => {
+    setCart([]);
+    try {
+      localStorage.setItem("sri-cart", JSON.stringify([]));
+    } catch (err) {
+      console.error("Failed to clear cart in localStorage", err);
+    }
   };
 
   const handleScroll = () => {
@@ -543,13 +560,15 @@ function AppContent() {
       </AnimatePresence>
 
       <Routes>
+        <Route path="/order" element={<OrderDetails />} />
         <Route path="/" element={
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          showFinalPay ? <FinalPay cart={cart} updateQuantity={updateCartQuantity} removeFromCart={removeFromCart} clearCart={clearCart} /> : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            >
             {/* Hero Section */}
             <section id="hero" className="relative pt-28 lg:pt-40 pb-20 overflow-hidden bg-[#fdf5e6]">
               {/* Massive Background Text */}
@@ -1097,7 +1116,7 @@ function AppContent() {
               onItemClick={handleItemClick}
             />
           </motion.div>
-        } />
+        )} />
         <Route path="/mens-tshirt" element={
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.4 }}>
             <ProductDetail category="Men's" product={tshirtProduct} selectedImage={selectedImage} setSelectedImage={setSelectedImage} addToCart={addToCart} onBack={() => { navigate("/"); window.scrollTo({ top: 0, behavior: "smooth" }); }} />

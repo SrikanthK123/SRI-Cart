@@ -50,7 +50,7 @@ export default function OrderDetails() {
             </div>
             <div className="grid gap-4">
               {payload.items.map((item, index) => (
-                <div key={index} className="flex items-center gap-4 rounded-[2rem] border border-black/5 bg-[#faf8f0] p-4">
+                <div key={index} className="flex flex-col sm:flex-row items-stretch gap-4 rounded-[2rem] border border-black/5 bg-[#faf8f0] p-4 w-full">
                   <div className="w-20 h-20 rounded-3xl overflow-hidden bg-white border border-black/5">
                     {item.image ? (
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover" />

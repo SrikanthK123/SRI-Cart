@@ -254,7 +254,7 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
             </button>
           </div>
         ) : (
-          <div className="grid gap-10 lg:grid-cols-[1.6fr_0.95fr] items-start">
+          <div className="grid gap-10 grid-cols-1 lg:grid-cols-[1.6fr_0.95fr] items-start w-full max-w-full mx-auto">
 
             {/* ── LEFT: Product + Coupon Section ── */}
             <div className="space-y-6">
@@ -279,7 +279,7 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, x: -40, height: 0, marginBottom: 0 }}
                         transition={{ duration: 0.35 }}
-                        className="rounded-[2rem] bg-[#faf8f0] border border-black/5 p-4 flex flex-col sm:flex-row items-center gap-4"
+                        className="rounded-[2rem] bg-[#faf8f0] border border-black/5 p-4 flex flex-col sm:flex-row items-stretch gap-4 w-full"
                       >
                         <div className="w-24 h-24 rounded-3xl overflow-hidden bg-[#f7f2ea] shadow-inner shadow-black/5 flex items-center justify-center">
                           {imgSrc ? (
@@ -319,7 +319,7 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
                             </span>
                           </div>
 
-                          <div className="mt-4 flex flex-wrap items-center gap-2 w-full">
+                          <div className="mt-4 flex flex-wrap justify-between items-center gap-2 w-full">
                             <button
                               onClick={() => updateQuantity(item.cartId, -1)}
                               className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1a1a1a]/70 hover:text-[#8b5e3c] transition-colors"

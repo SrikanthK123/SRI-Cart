@@ -481,7 +481,7 @@ function AppContent() {
               SRI-Cart
             </button>
             <div className="hidden lg:flex items-center gap-8">
-              {["Home", "BestSeller", "About", "Collections"].map((link) => (
+              {["Home", "BestSeller", "About", "Collections", "Orders"].map((link) => (
                 <button
                   key={link}
                   onClick={() => {
@@ -489,6 +489,7 @@ function AppContent() {
                     else if (link === "BestSeller") scrollToSection("best-seller");
                     else if (link === "About") scrollToSection("about");
                     else if (link === "Collections") scrollToSection("collections");
+                    else if (link === "Orders") navigate("/orders");
                     else navigate("/");
                   }}
                   className="text-[10px] font-bold uppercase tracking-widest text-black/40 hover:text-black transition-colors"
@@ -538,7 +539,7 @@ function AppContent() {
                 <X className="w-8 h-8" />
               </button>
               <div className="flex flex-col gap-10 mt-16">
-                {["Home", "BestSeller", "About", "Collections"].map((link) => (
+                {["Home", "BestSeller", "About", "Collections", "Orders"].map((link) => (
                   <button
                     key={link}
                     onClick={() => {
@@ -546,6 +547,7 @@ function AppContent() {
                       else if (link === "BestSeller") scrollToSection("best-seller");
                       else if (link === "About") scrollToSection("about");
                       else if (link === "Collections") scrollToSection("collections");
+                      else if (link === "Orders") { navigate("/orders"); setIsMenuOpen(false); }
                       else { navigate("/"); setIsMenuOpen(false); }
                     }}
                     className="text-3xl font-serif font-bold text-[#1a1a1a] text-left"
@@ -560,7 +562,7 @@ function AppContent() {
       </AnimatePresence>
 
       <Routes>
-        <Route path="/order" element={<OrderDetails />} />
+        <Route path="/orders" element={<OrderDetails />} />
         <Route path="/" element={
           showFinalPay ? <FinalPay cart={cart} updateQuantity={updateCartQuantity} removeFromCart={removeFromCart} clearCart={clearCart} /> : (
             <motion.div

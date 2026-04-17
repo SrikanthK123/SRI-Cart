@@ -105,14 +105,21 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
 
   const handleCheckout = () => {
     const orderId = `SRI-${Date.now()}`;
-    setCompletedOrder({
+    const orderData = {
       items: cart,
       total,
       date: new Date().toISOString(),
       orderId,
-    });
+    };
+    setCompletedOrder(orderData);
     setOrderPlaced(true);
+    window.scrollTo(0, 0);
     clearCart();
+
+    // Save to order history
+    const existingOrders = JSON.parse(localStorage.getItem("sri-orders") || "[]");
+    existingOrders.push(orderData);
+    localStorage.setItem("sri-orders", JSON.stringify(existingOrders));
 
     if (couponType === "firstOrder") {
       localStorage.setItem("sri-first-order-used", "true");
@@ -167,7 +174,7 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
             Thank you for shopping with SRI-Cart. Your order of{" "}
             <span className="font-bold text-[#8b5e3c]">₹{completedOrder?.total.toFixed(2)}</span> has been confirmed.
           </p>
-          <p className="text-[10px] uppercase tracking-widest text-black/30 mb-6">
+          <p className="text-[10px] uppercase tracking-widest text-green-700 font-bold mb-6">
             A confirmation will be sent to your email.
           </p>
 

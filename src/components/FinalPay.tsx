@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import QRCode from "qrcode";
+import html2canvas from "html2canvas";
 import {
   ArrowLeft, ArrowRight, Tag, Trash2, Minus, Plus,
   ShieldCheck, CreditCard, Truck, CheckCircle2, X
@@ -34,6 +35,7 @@ interface FinalPayProps {
 
 export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCart }: FinalPayProps) {
   const navigate = useNavigate();
+  const invoiceRef = useRef<HTMLDivElement>(null);
 
   const [couponCode, setCouponCode]     = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
@@ -43,6 +45,8 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
   const [orderPlaced, setOrderPlaced]   = useState(false);
   const [firstOrderAvailable, setFirstOrderAvailable] = useState(() => !localStorage.getItem("sri-first-order-used"));
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
+  const [invoiceImageUrl, setInvoiceImageUrl] = useState<string | null>(null);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<{
     items: CartItem[];
     total: number;
@@ -106,7 +110,7 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
   const handleCheckout = () => {
     const orderId = `SRI-${Date.now()}`;
     const orderData = {
-      items: cart,
+      items: cart.map((item) => ({ ...item })),
       total,
       date: new Date().toISOString(),
       orderId,
@@ -130,31 +134,188 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
   useEffect(() => {
     if (!orderPlaced || !completedOrder) return;
 
+    const appBasePath = "/SRI-Cart";
+    const orderOrigin = window.location.origin;
+
     const payload = {
       orderId: completedOrder.orderId,
       date: completedOrder.date,
       total: completedOrder.total,
-      items: completedOrder.items.map(item => ({
+      items: completedOrder.items.map((item) => ({
         name: item.name,
-        quantity: item.quantity,
         price: item.price,
-        image: item.images?.[item.selectedImageIndex ?? 0] ?? "",
+        quantity: item.quantity,
+        size: item.size,
+        images: [item.images?.[item.selectedImageIndex ?? 0] ?? ""],
+        selectedImageIndex: 0,
       })),
     };
 
-    const baseUrl = `${window.location.origin}${import.meta.env.BASE_URL || "/"}`.replace(/\/$/, "");
-    const raw = JSON.stringify(payload);
-    const encoded = btoa(encodeURIComponent(raw));
-    const orderUrl = `${baseUrl}/order?data=${encoded}`;
+    const encodedPayload = encodeURIComponent(JSON.stringify(payload));
+    const invoiceUrl = `${orderOrigin}${appBasePath}/invoice/${completedOrder.orderId}?data=${encodedPayload}`;
 
-    QRCode.toDataURL(orderUrl, { width: 400, margin: 2 })
-      .then((dataUrl) => setQrCodeDataUrl(dataUrl))
+    QRCode.toDataURL(invoiceUrl, { width: 400, margin: 2 })
+      .then((qrDataUrl) => setQrCodeDataUrl(qrDataUrl))
       .catch((err) => console.error("Failed to generate QR code", err));
+
+    setTimeout(() => {
+      if (!invoiceRef.current) {
+        console.warn("Invoice template ref not found");
+        return;
+      }
+
+      html2canvas(invoiceRef.current, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        imageTimeout: 0,
+      })
+        .then((canvas: HTMLCanvasElement) => {
+          const imgData = canvas.toDataURL("image/png");
+          setInvoiceImageUrl(imgData);
+
+          const orderWithInvoice = {
+            orderId: completedOrder.orderId,
+            date: completedOrder.date,
+            total: completedOrder.total,
+            items: completedOrder.items,
+            invoiceImage: imgData,
+          };
+
+          try {
+            const existingOrdersWithInvoices = JSON.parse(
+              localStorage.getItem("sri-orders-with-invoices") || "[]"
+            );
+            existingOrdersWithInvoices.push(orderWithInvoice);
+            localStorage.setItem(
+              "sri-orders-with-invoices",
+              JSON.stringify(existingOrdersWithInvoices)
+            );
+          } catch (err) {
+            console.error("Failed to save order with invoice", err);
+          }
+        })
+        .catch((err: Error) => console.error("Failed to generate invoice image", err));
+    }, 800);
   }, [orderPlaced, completedOrder]);
+
+  // Hidden invoice component for capturing as image
+  const InvoiceTemplate = () => (
+    <div
+      ref={invoiceRef}
+      className="w-[800px] bg-white p-12 rounded-lg"
+      style={{
+        position: "absolute",
+        left: "-9999px",
+        top: 0,
+        opacity: 0,
+        pointerEvents: "none",
+        display: orderPlaced ? "block" : "none",
+      }}
+    >
+      {/* Header */}
+      <div className="border-b-2 border-[#8b5e3c] pb-8 mb-8">
+        <h1 className="text-4xl font-serif font-black text-[#0F3D3E] mb-2">SRI-CART</h1>
+        <p className="text-sm text-black/50">Professional Shopping Experience</p>
+      </div>
+
+      {/* Order Info */}
+      <div className="grid grid-cols-2 gap-8 mb-10">
+        <div>
+          <p className="text-xs uppercase tracking-widest font-bold text-[#8b5e3c] mb-2">Order Number</p>
+          <p className="text-2xl font-bold text-[#1a1a1a]">{completedOrder?.orderId}</p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-widest font-bold text-[#8b5e3c] mb-2">Order Date</p>
+          <p className="text-lg text-[#1a1a1a]">
+            {completedOrder ? new Date(completedOrder.date).toLocaleString() : ""}
+          </p>
+        </div>
+      </div>
+
+      {/* Items Section */}
+      <div className="mb-10">
+        <h2 className="text-lg font-bold text-[#0F3D3E] mb-6 uppercase tracking-widest">Order Items</h2>
+        <div className="space-y-6">
+          {completedOrder?.items.map((item, idx) => (
+            <div key={item.cartId} className="border border-black/10 rounded-lg p-6 flex gap-6">
+              {/* Item Image */}
+              <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-[#faf8f0] border border-black/5">
+                {item.images?.[item.selectedImageIndex ?? 0] ? (
+                  <img
+                    src={item.images[item.selectedImageIndex ?? 0]}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs text-black/30">
+                    No Image
+                  </div>
+                )}
+              </div>
+
+              {/* Item Details */}
+              <div className="flex-1">
+                <div className="flex justify-between mb-3">
+                  <div>
+                    <p className="text-lg font-bold text-[#1a1a1a]">{idx + 1}. {item.name}</p>
+                    <p className="text-sm text-black/60 mt-1">Size: {item.size || "N/A"}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-black/60 mb-1">Unit Price</p>
+                    <p className="font-bold text-[#8b5e3c]">₹{item.price}</p>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-black/5">
+                  <p className="text-sm text-black/60">Quantity: <span className="font-bold text-[#1a1a1a]">{item.quantity}</span></p>
+                  <p className="text-sm font-bold text-[#0F3D3E]">
+                    Total: ₹{(parsePrice(item.price) * item.quantity).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Summary Section */}
+      <div className="border-t-2 border-black/10 pt-8">
+        <div className="flex justify-end mb-6 max-w-sm ml-auto">
+          <div className="w-full">
+            <div className="flex justify-between mb-3 text-sm">
+              <span className="text-black/60">Subtotal:</span>
+              <span className="font-semibold text-[#1a1a1a]">₹{(completedOrder?.total || 0).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between mb-3 text-sm">
+              <span className="text-black/60">Tax & Fees:</span>
+              <span className="font-semibold text-[#1a1a1a]">Included</span>
+            </div>
+            <div className="flex justify-between pt-3 border-t-2 border-[#8b5e3c]">
+              <span className="text-lg font-bold text-[#0F3D3E]">Total Amount:</span>
+              <span className="text-2xl font-black text-[#8b5e3c]">₹{completedOrder?.total.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-10 pt-8 border-t border-black/10 text-center">
+        <p className="text-xs text-black/50 mb-2">Thank you for your purchase!</p>
+        <p className="text-xs text-black/40">A confirmation email has been sent to your registered email address.</p>
+      </div>
+    </div>
+  );
 
   if (orderPlaced) {
     return (
-      <div className="min-h-screen bg-[#fdf5e6] flex flex-col items-center justify-center px-6 pt-28 pb-20">
+      <>
+        {/* Hidden invoice component for screenshot */}
+        <InvoiceTemplate />
+
+        {/* Main order confirmation display */}
+        <div className="min-h-screen bg-[#fdf5e6] flex flex-col items-center justify-center px-6 pt-28 pb-20">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -196,30 +357,86 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
             </div>
           </div>
 
-          <button
-            onClick={() => { localStorage.setItem("sri-cart", "[]"); navigate("/"); }}
-            className="w-full py-5 bg-[#8b5e3c] text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-[#704a2f] transition-all shadow-xl shadow-amber-900/20 flex items-center justify-center gap-3 group"
-          >
-            Back to Store
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
+          <div className="w-full mb-6">
+            <button
+              onClick={() => { localStorage.setItem("sri-cart", "[]"); navigate("/"); }}
+              className="w-full py-4 bg-[#8b5e3c] text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-[#704a2f] transition-all shadow-xl shadow-amber-900/20 flex items-center justify-center gap-3"
+            >
+              Back to Store
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
         </motion.div>
 
-        {qrCodeDataUrl && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="mt-12 text-center max-w-md w-full"
-          >
-            <h3 className="text-2xl font-serif font-bold text-[#0F3D3E] mb-4">Scan QR Code for Order Details</h3>
-            <p className="text-sm text-black/50 mb-6">Use your phone's camera to scan and view order information</p>
+        <AnimatePresence>
+          {showInvoiceModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-8"
+            >
+              <motion.div
+                initial={{ y: 20, opacity: 0, scale: 0.96 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: 20, opacity: 0, scale: 0.96 }}
+                className="w-full max-w-3xl rounded-[2rem] bg-white shadow-2xl overflow-hidden"
+              >
+                <div className="flex items-center justify-between gap-4 border-b border-black/10 px-6 py-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.3em] text-[#8b5e3c] mb-1">Invoice Preview</p>
+                    <h3 className="text-xl font-semibold text-[#0F3D3E]">Order {completedOrder?.orderId}</h3>
+                  </div>
+                  <button
+                    onClick={() => setShowInvoiceModal(false)}
+                    className="rounded-full p-2 text-[#1a1a1a] hover:bg-slate-100 transition"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="bg-[#f9f7f1] p-6">
+                  {invoiceImageUrl ? (
+                    <img
+                      src={invoiceImageUrl}
+                      alt="Invoice preview"
+                      className="w-full rounded-[1.5rem] object-contain"
+                    />
+                  ) : (
+                    <div className="min-h-[280px] flex flex-col items-center justify-center rounded-[1.5rem] bg-white border border-dashed border-black/10 p-10 text-center">
+                      <div className="w-12 h-12 border-4 border-[#8b5e3c]/20 border-t-[#8b5e3c] rounded-full animate-spin mb-4" />
+                      <p className="text-sm text-black/60">Generating invoice image…</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-12 text-center max-w-md w-full"
+        >
+          <h3 className="text-2xl font-serif font-bold text-[#0F3D3E] mb-4">Scan QR Code for Order Details</h3>
+          <p className="text-sm text-black/50 mb-2">Use your phone's camera to scan and view order information.</p>
+          <p className="text-sm text-black/50 mb-6">The detailed invoice will open on your mobile device.</p>
+
+          {qrCodeDataUrl ? (
             <div className="inline-block bg-white rounded-[2rem] p-6 shadow-xl border border-black/5">
               <img src={qrCodeDataUrl} alt="Order QR code" className="w-80 h-80 rounded-3xl" />
             </div>
-          </motion.div>
-        )}
-      </div>
+          ) : (
+            <div className="inline-flex flex-col items-center justify-center gap-4 bg-white rounded-[2rem] p-10 shadow-xl border border-black/5 h-80">
+              <div className="w-12 h-12 border-4 border-[#8b5e3c]/20 border-t-[#8b5e3c] rounded-full animate-spin" />
+              <p className="text-sm text-black/60">Generating QR code...</p>
+            </div>
+          )}
+        </motion.div>
+
+        </div>
+      </>
     );
   }
 

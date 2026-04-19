@@ -90,6 +90,7 @@ import { ProductDetail } from "./components/ProductDetail";
 import { CartPreview } from "./components/CartPreview";
 import FinalPay from "./components/FinalPay";
 import OrderDetails from "./components/OrderDetails";
+import InvoiceView from "./components/InvoiceView";
 import UpdatingPage from "./components/UpdatingPage";
 import FeatureBar from "./components/FeatureBar";
 
@@ -563,6 +564,7 @@ function AppContent() {
 
       <Routes>
         <Route path="/orders" element={<OrderDetails />} />
+        <Route path="/invoice/:orderId" element={<InvoiceView />} />
         <Route path="/" element={
           showFinalPay ? <FinalPay cart={cart} updateQuantity={updateCartQuantity} removeFromCart={removeFromCart} clearCart={clearCart} /> : (
             <motion.div

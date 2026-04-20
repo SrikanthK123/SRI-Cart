@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Package, Calendar, Hash } from "lucide-react";
+import { ArrowLeft, Package, Calendar, Hash, CheckCircle2, Truck, Box, MapPin, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface OrderItem {
@@ -27,6 +27,44 @@ export default function OrderDetails() {
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<OrderPayload | null>(null);
   const [orderToDelete, setOrderToDelete] = useState<OrderPayload | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
+
+  const getTrackingSteps = (orderDateStr: string) => {
+    const placedDate = new Date(orderDateStr);
+    
+    // Helper to add times
+    const addHours = (date: Date, hours: number) => new Date(date.getTime() + hours * 60 * 60 * 1000);
+    const addDays = (date: Date, days: number) => new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+    
+    const formatDate = (date: Date) => date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const formatTime = (date: Date) => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+    const steps = [
+      { label: 'Order Placed', icon: Box, date: placedDate },
+      { label: 'Packing', icon: Package, date: addHours(placedDate, 2.5) },
+      { label: 'Shipping', icon: Truck, date: addHours(addDays(placedDate, 1), 4) },
+      { label: 'Out for Delivery', icon: MapPin, date: addHours(addDays(placedDate, 4), 2) },
+      { label: 'Delivered', icon: CheckCircle2, date: addHours(addDays(placedDate, 5), 6) }
+    ];
+
+    const now = new Date();
+
+    return steps.map(step => ({
+      ...step,
+      completed: step.date <= now,
+      dateStr: formatDate(step.date),
+      timeStr: formatTime(step.date).toLowerCase()
+    }));
+  };
+
+  const toggleOrderTracking = (orderId: string) => {
+    setExpandedOrders(prev => {
+      const next = new Set(prev);
+      if (next.has(orderId)) next.delete(orderId);
+      else next.add(orderId);
+      return next;
+    });
+  };
 
   const handleDeleteOrder = (orderId: string) => {
     const updatedOrders = orders.filter((order) => order.orderId !== orderId);
@@ -171,7 +209,7 @@ export default function OrderDetails() {
                   <div className="grid gap-4 mb-6">
                     {order.items.map((item) => (
                       <div key={item.cartId} className="flex flex-col sm:flex-row items-stretch gap-4 rounded-[2rem] border border-black/5 bg-[#faf8f0] p-4 w-full">
-                        <div className="w-20 h-20 rounded-3xl overflow-hidden bg-white border border-black/5">
+                        <div className="w-20 h-20 rounded-3xl overflow-hidden bg-white border border-black/5 flex-shrink-0">
                           {item.images?.[item.selectedImageIndex ?? 0] ? (
                             <img src={item.images[item.selectedImageIndex ?? 0]} alt={item.name} className="w-full h-full object-cover" />
                           ) : (
@@ -188,6 +226,78 @@ export default function OrderDetails() {
                         </div>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="mb-6">
+                    <button 
+                      onClick={() => toggleOrderTracking(order.orderId)}
+                      className="flex items-center justify-between w-full text-xs font-bold text-[#8b5e3c] uppercase tracking-widest hover:text-[#704a2f] transition-all bg-[#faf8f0] px-6 py-4 rounded-2xl border border-black/5"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Truck className="w-4 h-4" />
+                        Delivery Status
+                      </span>
+                      {expandedOrders.has(order.orderId) ? (
+                        <span className="flex items-center gap-1">Hide Details <ChevronUp className="w-4 h-4" /></span>
+                      ) : (
+                        <span className="flex items-center gap-1">View Details <ChevronDown className="w-4 h-4" /></span>
+                      )}
+                    </button>
+
+                    <AnimatePresence>
+                      {expandedOrders.has(order.orderId) && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="pt-8 pb-4">
+                            <div className="overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+                              <div className="relative min-w-[480px] sm:min-w-0 sm:mx-8 flex items-start justify-between">
+                                {/* Progress Line */}
+                                {(() => {
+                                  const trackingSteps = getTrackingSteps(order.date);
+                                  const completedCount = trackingSteps.filter(s => s.completed).length;
+                                  const progressPercentage = completedCount === 0 ? 0 : Math.min(100, ((completedCount - 1) / (trackingSteps.length - 1)) * 100);
+
+                                  return (
+                                    <>
+                                      <div className="absolute left-0 top-6 -translate-y-1/2 w-full h-[2px] bg-gray-200 z-0"></div>
+                                      <div className="absolute left-0 top-6 -translate-y-1/2 h-[2px] bg-[#8b5e3c] z-0 transition-all duration-1000 ease-in-out" style={{ width: `${progressPercentage}%` }}></div>
+
+                                      {trackingSteps.map((step, idx) => (
+                                        <div key={idx} className="relative z-10 flex flex-col items-center gap-3 w-24 sm:w-28 mt-0">
+                                          <div className={`w-12 h-12 rounded-2xl flex flex-shrink-0 items-center justify-center outline outline-4 outline-[#faf8f0] transition-colors duration-500 ${step.completed ? 'bg-[#8b5e3c] text-white shadow-lg shadow-amber-900/20' : 'bg-white border-2 border-gray-200 text-gray-300'}`}>
+                                            <step.icon className="w-5 h-5" />
+                                          </div>
+                                          <div className="text-center">
+                                            <span className={`block text-[10px] sm:text-xs font-bold uppercase tracking-wider ${step.completed ? 'text-[#8b5e3c]' : 'text-gray-400'}`}>
+                                              {step.label}
+                                            </span>
+                                            {step.completed ? (
+                                              <div className="mt-1">
+                                                <span className="block text-[10px] text-gray-600 font-medium whitespace-nowrap">{step.dateStr}</span>
+                                                <span className="block text-[9px] text-gray-400 whitespace-nowrap">{step.timeStr}</span>
+                                              </div>
+                                            ) : (
+                                              <div className="mt-1">
+                                                <span className="block text-[9px] text-gray-400 font-medium whitespace-nowrap">Exp. {step.dateStr}</span>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6 border-t border-black/5">

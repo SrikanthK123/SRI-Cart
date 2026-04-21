@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { ShoppingCart, Smartphone, Gift, ShoppingBag, Menu, X, ChevronRight, ChevronLeft, Star, ArrowRight, Quote, Play, Heart, Plus, Minus, Home, Trophy, MessageSquare, Users, Zap, Camera, BatteryCharging, Monitor, Video, ClipboardCheck, Package, Truck, User } from "lucide-react";
+import { ShoppingCart, Smartphone, Gift, ShoppingBag, Menu, X, ChevronRight, ChevronLeft, Star, ArrowRight, Quote, Play, Heart, Plus, Minus, Home, Trophy, MessageSquare, Users, Zap, Camera, BatteryCharging, Monitor, Video, ClipboardCheck, Package, Truck, User, Crown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import SRI_StudioImg from "./assets/Images/SRI_PackingBag.jpg";
 import SRI_StudioImg2 from "./assets/Images/SRI_Studio_LongImage.jpg";
@@ -709,11 +709,11 @@ function AppContent() {
                     >
                       <div className="flex items-center gap-2 mb-3">
                         <div className="w-7 h-7 rounded-full bg-[#0F3D3E] flex items-center justify-center">
-                          <Smartphone className="w-3.5 h-3.5 text-white" />
+                          <Crown className="w-3.5 h-3.5 text-white" />
                         </div>
-                        <span className="text-[#0F3D3E] font-bold text-[10px]">Latest Tech</span>
+                        <span className="text-[#0F3D3E] font-bold text-[10px]">Best Choice</span>
                       </div>
-                      <p className="text-[#0F3D3E]/70 text-[10px] font-medium leading-relaxed">Experience the next generation of mobile innovation.</p>
+                      <p className="text-[#0F3D3E]/70 text-[10px] font-medium leading-relaxed">Discover our finest and most exclusive fashion selection.</p>
                     </motion.div>
 
                     {/* Main Visual Cluster */}

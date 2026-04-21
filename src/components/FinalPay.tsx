@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import QRCode from "qrcode";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
+import LogoImage from "../assets/Images/SRI-Cart LogoWebsite2.jpg";
 import {
   ArrowLeft, ArrowRight, Tag, Trash2, Minus, Plus,
   ShieldCheck, CreditCard, Truck, CheckCircle2, X
@@ -164,16 +165,11 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
         return;
       }
 
-      html2canvas(invoiceRef.current, {
+      toPng(invoiceRef.current, {
         backgroundColor: "#ffffff",
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        imageTimeout: 0,
+        pixelRatio: 2,
       })
-        .then((canvas: HTMLCanvasElement) => {
-          const imgData = canvas.toDataURL("image/png");
+        .then((imgData: string) => {
           setInvoiceImageUrl(imgData);
 
           const orderWithInvoice = {
@@ -215,10 +211,23 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
         display: orderPlaced ? "block" : "none",
       }}
     >
+      <div 
+        className="absolute inset-0 z-0 pointer-events-none opacity-[0.05]" 
+        style={{
+          backgroundImage: `url(${LogoImage})`,
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "60%",
+        }} 
+      />
+      <div className="relative z-10">
       {/* Header */}
-      <div className="border-b-2 border-[#8b5e3c] pb-8 mb-8">
-        <h1 className="text-4xl font-serif font-black text-[#0F3D3E] mb-2">SRI-CART</h1>
-        <p className="text-sm text-black/50">Professional Shopping Experience</p>
+      <div className="border-b-2 border-[#8b5e3c] pb-8 mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-serif font-black text-[#0F3D3E] mb-2">SRI-CART</h1>
+          <p className="text-sm text-black/50">Professional Shopping Experience</p>
+        </div>
+        <img src={LogoImage} alt="SRI-Cart Logo" className="h-16 object-contain mix-blend-multiply" />
       </div>
 
       {/* Order Info */}
@@ -304,6 +313,7 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
       <div className="mt-10 pt-8 border-t border-black/10 text-center">
         <p className="text-xs text-black/50 mb-2">Thank you for your purchase!</p>
         <p className="text-xs text-black/40">A confirmation email has been sent to your registered email address.</p>
+      </div>
       </div>
     </div>
   );

@@ -208,10 +208,7 @@ function AppContent() {
   useEffect(() => {
     // Reset scroll to top on refresh
     window.history.scrollRestoration = 'manual';
-    if (location.pathname === "/" && !location.hash) {
-      window.scrollTo(0, 0);
-    }
-
+    
     // Handle anchor scrolling
     if (location.hash) {
       const id = location.hash.replace("#", "");
@@ -221,6 +218,8 @@ function AppContent() {
           element.scrollIntoView({ behavior: 'smooth' });
         }
       }, 300);
+    } else {
+      window.scrollTo(0, 0);
     }
   }, [location.pathname, location.hash]);
   useEffect(() => {

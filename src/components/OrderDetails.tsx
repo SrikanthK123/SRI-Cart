@@ -1,7 +1,9 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Package, Calendar, Hash, CheckCircle2, Truck, Box, MapPin, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Package, Calendar, Hash, CheckCircle2, Truck, Box, MapPin, ChevronDown, ChevronUp, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toPng } from "html-to-image";
+import LogoImage from "../assets/Images/SRI-Cart LogoWebsite2.jpg";
 
 interface OrderItem {
   cartId: number;
@@ -23,6 +25,7 @@ interface OrderPayload {
 
 export default function OrderDetails() {
   const navigate = useNavigate();
+  const invoiceRef = useRef<HTMLDivElement>(null);
   const [orders, setOrders] = useState<OrderPayload[]>([]);
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<OrderPayload | null>(null);
   const [orderToDelete, setOrderToDelete] = useState<OrderPayload | null>(null);
@@ -337,6 +340,29 @@ export default function OrderDetails() {
               </div>
               <div className="flex flex-row gap-3 sm:w-auto w-full sm:justify-end">
                 <button
+                  onClick={async () => {
+                    if (invoiceRef.current) {
+                      try {
+                        const dataUrl = await toPng(invoiceRef.current, {
+                          backgroundColor: "#ffffff",
+                          pixelRatio: 2,
+                        });
+                        const link = document.createElement("a");
+                        link.href = dataUrl;
+                        link.download = `Invoice_${selectedInvoiceOrder.orderId}.png`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      } catch (error) {
+                        console.error("Failed to generate invoice image:", error);
+                      }
+                    }
+                  }}
+                  className="flex-1 sm:flex-none px-5 py-3 rounded-2xl bg-[#8b5e3c] text-sm font-bold uppercase tracking-[0.2em] text-white hover:bg-[#704a2f] transition whitespace-nowrap flex items-center justify-center gap-2"
+                >
+                  <Download className="w-4 h-4" /> Download
+                </button>
+                <button
                   onClick={() => setSelectedInvoiceOrder(null)}
                   className="flex-1 sm:flex-none px-5 py-3 rounded-2xl bg-[#f3ede5] text-sm font-bold uppercase tracking-[0.2em] text-[#1a1a1a] hover:bg-[#e7dfd3] transition whitespace-nowrap"
                 >
@@ -344,13 +370,28 @@ export default function OrderDetails() {
                 </button>
               </div>
             </div>
-            <div className="flex-1 bg-white p-6 sm:p-8 md:p-12 overflow-y-auto">
-              <div className="mb-6">
-                <p className="text-gray-500 font-medium text-lg mb-6">Professional Shopping Experience</p>
+            <div className="flex-1 bg-white overflow-y-auto">
+              <div ref={invoiceRef} className="p-6 sm:p-8 md:p-12 relative bg-white">
+                <div 
+                  className="absolute inset-0 z-0 pointer-events-none opacity-[0.05]" 
+                  style={{
+                    backgroundImage: `url(${LogoImage})`,
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                    backgroundSize: "60%",
+                  }} 
+                />
+                <div className="relative z-10">
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                  <div>
+                    <h1 className="text-4xl font-serif font-black text-[#0F3D3E] mb-2">SRI-CART</h1>
+                    <p className="text-gray-500 font-medium text-lg">Professional Shopping Experience</p>
+                  </div>
+                  <img src={LogoImage} alt="SRI-Cart Logo" className="h-16 object-contain mix-blend-multiply" />
+                </div>
                 <hr className="border-[#8b5e3c] border-t-2" />
-              </div>
 
-              <div className="flex flex-col sm:flex-row sm:justify-between mb-10 gap-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between mb-10 gap-6 mt-8">
                 <div>
                   <p className="text-[#8b5e3c] font-bold text-sm tracking-[0.15em] uppercase mb-2">Order Number</p>
                   <p className="text-3xl font-black text-[#1a1a1a]">{selectedInvoiceOrder.orderId}</p>
@@ -422,6 +463,8 @@ export default function OrderDetails() {
                   </div>
                 </div>
               </div>
+            </div>
+            </div>
             </div>
           </motion.div>
           </motion.div>

@@ -156,21 +156,24 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
       setFirstOrderAvailable(false);
     }
 
-    // Generate new scratch card for this order
+    // Generate new scratch card(s) for this order
+    const cardsToGenerate = totalQty >= 5 ? 5 : 1;
     const rewards: any[] = ["SRI10", "25_OFF", "50_OFF", "FREE_TAX", "BETTER_LUCK"];
-    const randomReward = rewards[Math.floor(Math.random() * rewards.length)];
-    const newScratchCard = {
-      id: orderId,
-      isScratched: false,
-      rewardType: randomReward,
-      couponCode: randomReward === "BETTER_LUCK" ? "" : `SRI-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      isUsed: false,
-      orderDate: new Date().toISOString()
-    };
-    
     const existingCards = JSON.parse(localStorage.getItem("sri-scratch-cards") || "[]");
-    existingCards.push(newScratchCard);
+
+    for (let i = 0; i < cardsToGenerate; i++) {
+        const randomReward = rewards[Math.floor(Math.random() * rewards.length)];
+        const newScratchCard = {
+          id: `${orderId}-${Date.now()}-${i}`,
+          isScratched: false,
+          rewardType: randomReward,
+          couponCode: randomReward === "BETTER_LUCK" ? "" : `SRI-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          isUsed: false,
+          orderDate: new Date().toISOString()
+        };
+        existingCards.push(newScratchCard);
+    }
     
     // Mark applied coupon as used
     if (activeCouponId) {

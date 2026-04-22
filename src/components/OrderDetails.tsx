@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Package, Calendar, Hash, CheckCircle2, Truck, Box, MapPin, ChevronDown, ChevronUp, Download, Gift, Tag, Copy } from "lucide-react";
+import { ArrowLeft, Package, Calendar, Hash, CheckCircle2, Truck, Box, MapPin, ChevronDown, ChevronUp, Download, Gift, Tag, Copy, Trash2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toPng } from "html-to-image";
 import LogoImage from "../assets/Images/SRI-Cart LogoWebsite2.jpg";
@@ -23,6 +23,84 @@ interface OrderPayload {
   invoiceImage?: string;
 }
 
+const getCardStyles = (card: any) => {
+  if (!card.isScratched) {
+    return {
+      wrapper: "bg-gradient-to-br from-[#8b5e3c] to-[#0F3D3E] border-transparent shadow-[0_10px_40px_rgba(15,61,62,0.2)]",
+      tag: "text-white/80",
+      codeBox: "bg-white/10 text-white border border-white/20 backdrop-blur-md",
+      button: "bg-white/20 text-white hover:bg-white/30 backdrop-blur-md border border-white/10",
+      title: "text-white",
+      desc: "text-white/60"
+    };
+  }
+  if (card.isUsed) {
+    return {
+      wrapper: "bg-[#f8f9fa] border-black/5 opacity-70 grayscale",
+      tag: "text-gray-400",
+      codeBox: "bg-gray-100 text-gray-400 line-through border-transparent",
+      button: "bg-gray-200 text-gray-400 flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg cursor-not-allowed",
+      title: "text-gray-500",
+      desc: "text-gray-400"
+    };
+  }
+  if (card.rewardType === "BETTER_LUCK") {
+    return {
+      wrapper: "bg-gradient-to-br from-slate-50 via-gray-100 to-slate-200 border-white/60 shadow-[inset_0_3px_10px_rgba(255,255,255,0.7)]",
+      tag: "text-slate-500",
+      codeBox: "bg-white/50 border border-slate-200 text-slate-800 shadow-sm",
+      button: "bg-slate-800 text-white hover:bg-slate-900 shadow-lg shadow-slate-900/20 flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg",
+      title: "text-slate-900",
+      desc: "text-slate-500"
+    };
+  }
+  
+  const commonButton = "flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-colors shadow-lg backdrop-blur-sm self-center w-full justify-center ";
+  
+  switch (card.rewardType) {
+    case "50_OFF": return {
+      wrapper: "bg-gradient-to-br from-[#fff0f2] via-[#ffe6e9] to-[#ffd1d6] border-white/80 shadow-[inset_0_4px_12px_rgba(255,255,255,0.9),_0_10px_40px_rgba(255,209,214,0.4)]",
+      tag: "text-rose-700/80",
+      codeBox: "bg-white/60 border border-white/80 text-rose-950 shadow-[0_2px_10px_rgba(0,0,0,0.02)] backdrop-blur-md",
+      button: commonButton + "bg-rose-500/90 text-white hover:bg-rose-600 shadow-rose-500/20 border border-white/20",
+      title: "text-rose-950",
+      desc: "text-rose-800/60"
+    };
+    case "25_OFF": return {
+      wrapper: "bg-gradient-to-br from-[#fff7ed] via-[#ffedd5] to-[#fed7aa] border-white/80 shadow-[inset_0_4px_12px_rgba(255,255,255,0.9),_0_10px_40px_rgba(254,215,170,0.4)]",
+      tag: "text-amber-800/80",
+      codeBox: "bg-white/60 border border-white/80 text-amber-950 shadow-[0_2px_10px_rgba(0,0,0,0.02)] backdrop-blur-md",
+      button: commonButton + "bg-amber-600/90 text-white hover:bg-amber-700 shadow-amber-600/20 border border-white/20",
+      title: "text-amber-950",
+      desc: "text-amber-800/60"
+    };
+    case "SRI10": return {
+      wrapper: "bg-gradient-to-br from-[#eff6ff] via-[#dbeafe] to-[#bfdbfe] border-white/80 shadow-[inset_0_4px_12px_rgba(255,255,255,0.9),_0_10px_40px_rgba(191,219,254,0.4)]",
+      tag: "text-blue-700/80",
+      codeBox: "bg-white/60 border border-white/80 text-blue-950 shadow-[0_2px_10px_rgba(0,0,0,0.02)] backdrop-blur-md",
+      button: commonButton + "bg-blue-600/90 text-white hover:bg-blue-700 shadow-blue-600/20 border border-white/20",
+      title: "text-blue-950",
+      desc: "text-blue-800/60"
+    };
+    case "FREE_TAX": return {
+      wrapper: "bg-gradient-to-br from-[#ecfdf5] via-[#d1fae5] to-[#a7f3d0] border-white/80 shadow-[inset_0_4px_12px_rgba(255,255,255,0.9),_0_10px_40px_rgba(167,243,208,0.4)]",
+      tag: "text-emerald-700/80",
+      codeBox: "bg-white/60 border border-white/80 text-emerald-950 shadow-[0_2px_10px_rgba(0,0,0,0.02)] backdrop-blur-md",
+      button: commonButton + "bg-emerald-600/90 text-white hover:bg-emerald-700 shadow-emerald-600/20 border border-white/20",
+      title: "text-emerald-950",
+      desc: "text-emerald-800/60"
+    };
+    default: return {
+      wrapper: "bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] border-white/80 shadow-[inset_0_4px_12px_rgba(255,255,255,0.9),_0_10px_40px_rgba(226,232,240,0.4)]",
+      tag: "text-slate-600",
+      codeBox: "bg-white/60 border border-white/80 text-slate-800 shadow-[0_2px_10px_rgba(0,0,0,0.02)] backdrop-blur-md",
+      button: commonButton + "bg-slate-700/90 text-white hover:bg-slate-800 shadow-slate-900/20 border border-white/20",
+      title: "text-slate-900",
+      desc: "text-slate-600/60"
+    };
+  }
+};
+
 export default function OrderDetails() {
   const navigate = useNavigate();
   const invoiceRef = useRef<HTMLDivElement>(null);
@@ -34,12 +112,45 @@ export default function OrderDetails() {
   const [scratchCards, setScratchCards] = useState<any[]>([]);
   const [copiedCoupon, setCopiedCoupon] = useState<string | null>(null);
 
+  const sortCards = (cards: any[]) => {
+    return [...cards].sort((a, b) => {
+      const getRank = (card: any) => {
+        if (card.isUsed || (card.isScratched && card.rewardType === "BETTER_LUCK")) return 2;
+        if (card.isScratched) return 1;
+        return 0;
+      };
+      
+      const rankA = getRank(a);
+      const rankB = getRank(b);
+      
+      if (rankA !== rankB) return rankA - rankB;
+      
+      return new Date(b.orderDate || 0).getTime() - new Date(a.orderDate || 0).getTime();
+    });
+  };
+
   const handleRevealCard = (cardId: string) => {
     const updated = scratchCards.map(c => 
       c.id === cardId ? { ...c, isScratched: true } : c
     );
     setScratchCards(updated);
+    
+    // Sort after a short delay so the user can see what they got before it moves
+    setTimeout(() => {
+      setScratchCards(prev => sortCards(prev));
+    }, 1200);
+    
     localStorage.setItem("sri-scratch-cards", JSON.stringify(updated));
+  };
+
+  const handleDeleteCard = (cardId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updated = scratchCards.filter(c => c.id !== cardId);
+    setScratchCards(updated);
+    
+    const allCards = JSON.parse(localStorage.getItem("sri-scratch-cards") || "[]");
+    const newAllCards = allCards.filter((c: any) => c.id !== cardId);
+    localStorage.setItem("sri-scratch-cards", JSON.stringify(newAllCards));
   };
 
   const handleCopyCoupon = (code: string) => {
@@ -146,11 +257,13 @@ export default function OrderDetails() {
     const validCards = savedCards.filter((card: any) => {
       if (!card.isUsed) return true;
       if (!card.usedAt) return true;
-      const hoursSinceUsed = (Date.now() - new Date(card.usedAt).getTime()) / (1000 * 60 * 60);
-      return hoursSinceUsed <= 48;
+      const minutesSinceUsed = (Date.now() - new Date(card.usedAt).getTime()) / (1000 * 60);
+      return minutesSinceUsed <= 90;
     });
-    setScratchCards(validCards.reverse());
+    setScratchCards(sortCards(validCards.reverse()));
   }, []);
+
+  const unopenedCount = scratchCards.filter(c => !c.isScratched).length;
 
   return (
     <div className="min-h-screen bg-[#fdf5e6] py-28 px-6">
@@ -172,16 +285,23 @@ export default function OrderDetails() {
         {/* Rewards Section */}
         {scratchCards.length > 0 && (
           <div className="mb-12">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-6 flex-wrap">
               <Gift className="w-6 h-6 text-[#8b5e3c]" />
               <h2 className="text-2xl font-serif font-black text-[#1a1a1a]">Your Rewards & Offers</h2>
+              {unopenedCount > 0 && (
+                <span className="bg-[#8b5e3c] text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest shadow-md flex items-center justify-center">
+                  {unopenedCount} Available
+                </span>
+              )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {scratchCards.map((card) => (
+            <div className="flex overflow-x-auto snap-x snap-mandatory pb-4 gap-4 no-scrollbar -mx-6 px-6 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:overflow-visible">
+              {scratchCards.map((card) => {
+                const styles = getCardStyles(card);
+                return (
                 <motion.div 
                   key={card.id} 
                   layout
-                  className={`relative overflow-hidden rounded-[2rem] border ${card.isScratched ? 'bg-white border-black/10' : 'bg-gradient-to-br from-[#8b5e3c] to-[#0F3D3E] border-transparent'} shadow-xl p-6 h-48 flex flex-col items-center justify-center text-center cursor-pointer`}
+                  className={`relative shrink-0 w-[280px] sm:w-auto snap-center overflow-hidden rounded-[2rem] border p-6 h-48 flex flex-col items-center justify-center text-center cursor-pointer ${styles.wrapper}`}
                   onClick={() => !card.isScratched && handleRevealCard(card.id)}
                   whileHover={!card.isScratched ? { scale: 1.02, rotate: [-1, 1, -1, 0] } : {}}
                   transition={{ duration: 0.2 }}
@@ -197,41 +317,55 @@ export default function OrderDetails() {
                     <motion.div 
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="flex flex-col items-center w-full"
+                      className="flex flex-col items-center w-full relative h-full justify-center"
                     >
+                      {(card.isUsed || card.rewardType === "BETTER_LUCK") && (
+                        <button
+                          onClick={(e) => handleDeleteCard(card.id, e)}
+                          className="absolute -top-4 -right-4 p-2 bg-red-50 text-red-500 rounded-full hover:bg-red-100 transition-colors"
+                          title="Remove card"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                      
                       {card.rewardType === "BETTER_LUCK" ? (
                         <>
-                          <p className="text-lg font-bold text-[#1a1a1a] mb-2">Better Luck Next Time!</p>
-                          <p className="text-xs text-black/50">Keep shopping to earn more rewards.</p>
+                          <p className={`text-lg font-bold mb-2 mt-4 z-10 ${styles.title}`}>Better Luck Next Time!</p>
+                          <p className={`text-xs z-10 ${styles.desc}`}>Keep shopping to earn more rewards.</p>
                         </>
                       ) : (
-                        <>
-                          <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#8b5e3c] mb-1">
+                        <div className="mt-4 flex flex-col items-center w-full z-10">
+                          <p className={`text-[10px] uppercase tracking-[0.2em] font-bold mb-1 ${styles.tag}`}>
                             {card.rewardType === "FREE_TAX" ? "Tax Free Offer" : card.rewardType.replace("_", " ")}
                           </p>
-                          <div className={`px-4 py-2 rounded-xl mb-3 ${card.isUsed ? 'bg-gray-100 text-gray-400 line-through' : 'bg-[#faf8f0] text-[#0F3D3E] border border-[#8b5e3c]/20'}`}>
+                          <div className={`px-4 py-2 rounded-xl mb-3 ${styles.codeBox}`}>
                             <span className="font-mono font-bold text-lg">{card.couponCode}</span>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 w-3/4 mb-4">
                             <button 
                               onClick={(e) => { e.stopPropagation(); handleCopyCoupon(card.couponCode); }}
                               disabled={card.isUsed}
-                              className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-colors ${card.isUsed ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#8b5e3c] text-white hover:bg-[#704a2f]'}`}
+                              className={styles.button}
                             >
                               {card.isUsed ? <CheckCircle2 className="w-3.5 h-3.5" /> : copiedCoupon === card.couponCode ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                               {card.isUsed ? "Used" : copiedCoupon === card.couponCode ? "Copied" : "Copy Code"}
                             </button>
                           </div>
-                        </>
+                          {!card.isUsed && card.expiresAt && (
+                            <p className={`text-[9px] uppercase tracking-wider font-bold ${styles.desc}`}>
+                              Valid till {new Date(card.expiresAt).toLocaleDateString('en-GB')}
+                            </p>
+                          )}
+                        </div>
                       )}
                     </motion.div>
                   )}
                   
-                  {!card.isScratched && (
-                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 pointer-events-none" />
-                  )}
+                  <div className={`absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none mix-blend-overlay ${card.isUsed ? 'grayscale' : ''}`} />
                 </motion.div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

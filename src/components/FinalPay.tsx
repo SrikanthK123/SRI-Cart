@@ -40,11 +40,13 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
 
   const [couponCode, setCouponCode]     = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
-  const [couponType, setCouponType] = useState<"firstOrder" | "standard" | null>(null);
+  const [couponType, setCouponType] = useState<"firstOrder" | "standard" | "SRI10" | "25_OFF" | "50_OFF" | "FREE_TAX" | null>(null);
+  const [activeCouponId, setActiveCouponId] = useState<string | null>(null);
   const [couponError, setCouponError]   = useState(false);
   const [selectedPayment, setSelectedPayment] = useState("visa");
   const [orderPlaced, setOrderPlaced]   = useState(false);
   const [firstOrderAvailable, setFirstOrderAvailable] = useState(() => !localStorage.getItem("sri-first-order-used"));
+  const [availableCoupons, setAvailableCoupons] = useState<any[]>([]);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
   const [invoiceImageUrl, setInvoiceImageUrl] = useState<string | null>(null);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
@@ -55,7 +57,11 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
     orderId: string;
   } | null>(null);
 
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  useEffect(() => { 
+    window.scrollTo(0, 0); 
+    const cards = JSON.parse(localStorage.getItem("sri-scratch-cards") || "[]");
+    setAvailableCoupons(cards.filter((c: any) => c.isScratched && !c.isUsed && c.rewardType !== "BETTER_LUCK"));
+  }, []);
 
   const parsePrice = (price: string) =>
     parseFloat((price || "0").replace(/,/g, ""));
@@ -63,16 +69,22 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
   const itemsTotal  = cart.reduce((acc, item) => acc + parsePrice(item.price) * item.quantity, 0);
   const totalQty    = cart.reduce((acc, item) => acc + item.quantity, 0);
   const shopDiscount = Math.min(25, Math.floor(itemsTotal * 0.01));
-  const couponDiscount = couponApplied
-    ? couponType === "firstOrder"
-      ? Math.floor(itemsTotal * 0.25)
-      : Math.floor(itemsTotal * 0.1)
-    : 0;
+
+  let couponDiscount = 0;
+  if (couponApplied) {
+    if (couponType === "firstOrder") couponDiscount = Math.floor(itemsTotal * 0.25);
+    else if (couponType === "standard" || couponType === "SRI10") couponDiscount = Math.floor(itemsTotal * 0.1);
+    else if (couponType === "25_OFF") couponDiscount = Math.floor(itemsTotal * 0.25);
+    else if (couponType === "50_OFF") couponDiscount = Math.floor(itemsTotal * 0.50);
+  }
+
   const subtotal    = itemsTotal - shopDiscount - couponDiscount;
   const shipping    = itemsTotal > 1500 ? 0 : 99;
 
   let tax = 0;
-  if (totalQty > 0) {
+  if (couponApplied && couponType === "FREE_TAX") {
+    tax = 0;
+  } else if (totalQty > 0) {
     if (totalQty <= 2) {
       const norm = Math.min(1, Math.max(0, (itemsTotal - 300) / 1700));
       tax = Math.round(100 + norm * 50);
@@ -84,10 +96,21 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
 
   const total = subtotal + shipping + tax;
 
-  const handleApplyCoupon = () => {
-    const normalized = couponCode.trim().toLowerCase();
+  const handleApplyCoupon = (codeOverride?: string) => {
+    // If it's the click event, codeOverride will be an object. Check type.
+    const codeToUse = typeof codeOverride === 'string' ? codeOverride : couponCode.trim();
+    if (typeof codeOverride === 'string') setCouponCode(codeOverride);
 
-    if (normalized === "srifirst") {
+    const normalized = codeToUse.toLowerCase();
+
+    const matchedCard = availableCoupons.find(c => c.couponCode.toLowerCase() === normalized);
+
+    if (matchedCard) {
+      setCouponApplied(true);
+      setCouponType(matchedCard.rewardType);
+      setActiveCouponId(matchedCard.id);
+      setCouponError(false);
+    } else if (normalized === "srifirst") {
       if (!firstOrderAvailable) {
         setCouponError(true);
         setCouponType(null);
@@ -105,7 +128,9 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
       setCouponType(null);
     }
 
-    setTimeout(() => setCouponError(false), 2500);
+    if (!matchedCard && normalized !== "srifirst" && normalized !== "sri10") {
+      setTimeout(() => setCouponError(false), 2500);
+    }
   };
 
   const handleCheckout = () => {
@@ -130,6 +155,33 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
       localStorage.setItem("sri-first-order-used", "true");
       setFirstOrderAvailable(false);
     }
+
+    // Generate new scratch card for this order
+    const rewards: any[] = ["SRI10", "25_OFF", "50_OFF", "FREE_TAX", "BETTER_LUCK"];
+    const randomReward = rewards[Math.floor(Math.random() * rewards.length)];
+    const newScratchCard = {
+      id: orderId,
+      isScratched: false,
+      rewardType: randomReward,
+      couponCode: randomReward === "BETTER_LUCK" ? "" : `SRI-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      isUsed: false,
+      orderDate: new Date().toISOString()
+    };
+    
+    const existingCards = JSON.parse(localStorage.getItem("sri-scratch-cards") || "[]");
+    existingCards.push(newScratchCard);
+    
+    // Mark applied coupon as used
+    if (activeCouponId) {
+      const cardIndex = existingCards.findIndex((c: any) => c.id === activeCouponId);
+      if (cardIndex >= 0) {
+        existingCards[cardIndex].isUsed = true;
+        existingCards[cardIndex].usedAt = new Date().toISOString();
+      }
+    }
+    
+    localStorage.setItem("sri-scratch-cards", JSON.stringify(existingCards));
   };
 
   useEffect(() => {
@@ -605,7 +657,7 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
                   />
                   {couponApplied ? (
                     <button
-                      onClick={() => { setCouponApplied(false); setCouponCode(""); setCouponType(null); }}
+                      onClick={() => { setCouponApplied(false); setCouponCode(""); setCouponType(null); setActiveCouponId(null); }}
                       className="h-16 rounded-3xl border border-red-200 bg-white px-8 text-sm font-bold uppercase tracking-[0.25em] text-red-500 hover:bg-red-50 transition-all"
                     >
                       Remove
@@ -632,6 +684,25 @@ export default function FinalPay({ cart, updateQuantity, removeFromCart, clearCa
                   >
                     Invalid coupon code. Please try again.
                   </motion.p>
+                )}
+
+                {/* Available Coupons */}
+                {availableCoupons.length > 0 && !couponApplied && (
+                  <div className="mt-6 border-t border-black/5 pt-6">
+                    <p className="text-xs uppercase tracking-[0.2em] font-bold text-[#8b5e3c] mb-4">Available Rewards</p>
+                    <div className="flex flex-wrap gap-3">
+                      {availableCoupons.map((coupon) => (
+                        <button
+                          key={coupon.id}
+                          onClick={() => handleApplyCoupon(coupon.couponCode)}
+                          className="px-4 py-2 border border-[#8b5e3c]/20 bg-[#faf8f0] hover:bg-[#f3ede5] rounded-xl text-xs font-bold text-[#0F3D3E] transition-colors flex items-center gap-2"
+                        >
+                          <Tag className="w-3 h-3 text-[#8b5e3c]" />
+                          {coupon.couponCode}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

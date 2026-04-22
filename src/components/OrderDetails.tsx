@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Package, Calendar, Hash, CheckCircle2, Truck, Box, MapPin, ChevronDown, ChevronUp, Download } from "lucide-react";
+import { ArrowLeft, Package, Calendar, Hash, CheckCircle2, Truck, Box, MapPin, ChevronDown, ChevronUp, Download, Gift, Tag, Copy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toPng } from "html-to-image";
 import LogoImage from "../assets/Images/SRI-Cart LogoWebsite2.jpg";
@@ -31,7 +31,22 @@ export default function OrderDetails() {
   const [orderToDelete, setOrderToDelete] = useState<OrderPayload | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
+  const [scratchCards, setScratchCards] = useState<any[]>([]);
+  const [copiedCoupon, setCopiedCoupon] = useState<string | null>(null);
 
+  const handleRevealCard = (cardId: string) => {
+    const updated = scratchCards.map(c => 
+      c.id === cardId ? { ...c, isScratched: true } : c
+    );
+    setScratchCards(updated);
+    localStorage.setItem("sri-scratch-cards", JSON.stringify(updated));
+  };
+
+  const handleCopyCoupon = (code: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCoupon(code);
+    setTimeout(() => setCopiedCoupon(null), 2000);
+  };
   const getTrackingSteps = (orderDateStr: string) => {
     const placedDate = new Date(orderDateStr);
     
@@ -126,6 +141,15 @@ export default function OrderDetails() {
         invoiceImage: invoiceMap.get(order.orderId),
       }))
     );
+    
+    const savedCards = JSON.parse(localStorage.getItem("sri-scratch-cards") || "[]");
+    const validCards = savedCards.filter((card: any) => {
+      if (!card.isUsed) return true;
+      if (!card.usedAt) return true;
+      const hoursSinceUsed = (Date.now() - new Date(card.usedAt).getTime()) / (1000 * 60 * 60);
+      return hoursSinceUsed <= 48;
+    });
+    setScratchCards(validCards.reverse());
   }, []);
 
   return (
@@ -144,6 +168,73 @@ export default function OrderDetails() {
             View all your previous orders, track their status, and access order details.
           </p>
         </div>
+
+        {/* Rewards Section */}
+        {scratchCards.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <Gift className="w-6 h-6 text-[#8b5e3c]" />
+              <h2 className="text-2xl font-serif font-black text-[#1a1a1a]">Your Rewards & Offers</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {scratchCards.map((card) => (
+                <motion.div 
+                  key={card.id} 
+                  layout
+                  className={`relative overflow-hidden rounded-[2rem] border ${card.isScratched ? 'bg-white border-black/10' : 'bg-gradient-to-br from-[#8b5e3c] to-[#0F3D3E] border-transparent'} shadow-xl p-6 h-48 flex flex-col items-center justify-center text-center cursor-pointer`}
+                  onClick={() => !card.isScratched && handleRevealCard(card.id)}
+                  whileHover={!card.isScratched ? { scale: 1.02, rotate: [-1, 1, -1, 0] } : {}}
+                  transition={{ duration: 0.2 }}
+                  whileTap={!card.isScratched ? { scale: 0.98 } : {}}
+                >
+                  {!card.isScratched ? (
+                    <div className="flex flex-col items-center gap-3 z-10 w-full text-white">
+                      <Gift className="w-8 h-8 opacity-80" />
+                      <p className="font-bold uppercase tracking-widest text-sm">Reward Unlocked!</p>
+                      <p className="text-xs text-white/60">Tap to scratch & reveal</p>
+                    </div>
+                  ) : (
+                    <motion.div 
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="flex flex-col items-center w-full"
+                    >
+                      {card.rewardType === "BETTER_LUCK" ? (
+                        <>
+                          <p className="text-lg font-bold text-[#1a1a1a] mb-2">Better Luck Next Time!</p>
+                          <p className="text-xs text-black/50">Keep shopping to earn more rewards.</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#8b5e3c] mb-1">
+                            {card.rewardType === "FREE_TAX" ? "Tax Free Offer" : card.rewardType.replace("_", " ")}
+                          </p>
+                          <div className={`px-4 py-2 rounded-xl mb-3 ${card.isUsed ? 'bg-gray-100 text-gray-400 line-through' : 'bg-[#faf8f0] text-[#0F3D3E] border border-[#8b5e3c]/20'}`}>
+                            <span className="font-mono font-bold text-lg">{card.couponCode}</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleCopyCoupon(card.couponCode); }}
+                              disabled={card.isUsed}
+                              className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-colors ${card.isUsed ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#8b5e3c] text-white hover:bg-[#704a2f]'}`}
+                            >
+                              {card.isUsed ? <CheckCircle2 className="w-3.5 h-3.5" /> : copiedCoupon === card.couponCode ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                              {card.isUsed ? "Used" : copiedCoupon === card.couponCode ? "Copied" : "Copy Code"}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </motion.div>
+                  )}
+                  
+                  {!card.isScratched && (
+                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 pointer-events-none" />
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {orders.length === 0 ? (
           <div className="bg-white rounded-[3rem] shadow-2xl p-16 text-center">

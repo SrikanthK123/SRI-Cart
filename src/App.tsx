@@ -93,6 +93,7 @@ import OrderDetails from "./components/OrderDetails";
 import InvoiceView from "./components/InvoiceView";
 import UpdatingPage from "./components/UpdatingPage";
 import FeatureBar from "./components/FeatureBar";
+import { AIChat } from "./components/AIChat";
 
 
 export default function App() {
@@ -127,6 +128,7 @@ function AppContent() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isLogoRevealPlaying, setIsLogoRevealPlaying] = useState(false);
+  const [unavailableItem, setUnavailableItem] = useState<{name: string} | null>(null);
   const galleryRef = useRef<HTMLDivElement | null>(null);
 
   const addToCart = (product: any, quantity: number, size: string, selectedImageIndex: number) => {
@@ -944,7 +946,10 @@ function AppContent() {
                             <span className="text-[10px] text-black/30 line-through mt-1">₹1,499</span>
                           </div>
                         </div>
-                        <button className="w-full py-3 bg-black text-white rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-[#8b5e3c] transition-colors">
+                        <button 
+                          onClick={() => setUnavailableItem(product)}
+                          className="w-full py-3 bg-black text-white rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-[#8b5e3c] transition-colors"
+                        >
                           Buy Now
                         </button>
                       </div>
@@ -1292,6 +1297,44 @@ function AppContent() {
         updateQuantity={updateCartQuantity}
         removeFromCart={removeFromCart}
       />
+      <AnimatePresence>
+        {unavailableItem && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 lg:p-0"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl relative"
+            >
+              <button 
+                onClick={() => setUnavailableItem(null)}
+                className="absolute top-4 right-4 p-2 hover:bg-black/5 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+                <Package className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-2xl font-serif font-bold text-center text-[#1a1a1a] mb-2">Out of Stock</h3>
+              <p className="text-center text-black/60 mb-8">
+                We're sorry, but the <span className="font-bold text-black">{unavailableItem.name}</span> is currently unavailable. Please check back later.
+              </p>
+              <button 
+                onClick={() => setUnavailableItem(null)}
+                className="w-full py-3 bg-[#0F3D3E] text-white rounded-xl font-bold tracking-widest uppercase hover:bg-[#043927] transition-colors"
+              >
+                Close
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AIChat />
     </div>
   );
 }
